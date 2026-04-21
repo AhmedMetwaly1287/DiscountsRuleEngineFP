@@ -8,7 +8,7 @@ object Rules {
 
   // Each rule returns Some(discount) if the transaction qualifies, None otherwise
   private def expiryDiscount(t: Transaction): Option[Double] = {
-    val numDays = ChronoUnit.DAYS.between(t.timestamp, t.expiryDate)
+    val numDays = ChronoUnit.DAYS.between(t.timestamp.toLocalDate, t.expiryDate)
     if (numDays < 30 && numDays >= 0) Some((30 - numDays)/100.0)
     else
       None
