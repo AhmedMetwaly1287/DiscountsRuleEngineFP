@@ -82,4 +82,15 @@ object FileReader {
       Left(s"FileReader: No valid transactions could be parsed from $filePath")
     }
   }
+
+  def read(filePath: String): Either[String, List[Transaction]] = {
+    validateExtension(filePath) match {
+      case Left(err) => Left(err)
+      case Right(_)  =>
+        validateNotEmpty(filePath) match {
+          case Left(err)   => Left(err)
+          case Right(lines) => readRows(filePath)
+        }
+    }
+  }
 }
