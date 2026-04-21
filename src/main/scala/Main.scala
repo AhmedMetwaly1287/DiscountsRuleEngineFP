@@ -3,7 +3,7 @@ import engine.RulesEngine
 
 object Main extends App {
 
-  val inputFilePath = "E:\\Work\\ITI\\Courses\\Course 22 - Scala\\Labs\\Project\\TRX10M.csv"
+  val inputFilePath = "TRX1000.csv"
 
   FileReader.read(inputFilePath) match {
     case Left(err) => Logger.error(s"Pipeline failed: $err")
