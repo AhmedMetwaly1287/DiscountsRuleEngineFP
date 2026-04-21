@@ -16,20 +16,17 @@ object FileReader {
       Right(filePath)
     }
     else{
-        val errMsg = s"FileReader: Invalid file Format, File Path: $filePath"
-        Logger.error(errMsg)
-        Left(errMsg)
-      }
-    }
-
-  private def readFile(fileName: String, codec: String = Codec.UTF8.toString): List[String] = {
-    // Using.resource ensures the file is closed automatically
-    Using.resource(Source.fromFile(fileName, codec)) { source =>
-      source.getLines().toList
+      val errMsg = s"FileReader: Invalid file Format, File Path: $filePath"
+      Logger.error(errMsg)
+      Left(errMsg)
     }
   }
 
-  private def validateNotEmpty(filePath: String): Either[String, List[String]] = {
+  private def readFile(fileName: String, codec: String = Codec.UTF8.toString): Iterator[String] = {
+    Source.fromFile(fileName, codec).getLines()
+  }
+
+  private def validateNotEmpty(filePath: String): Either[String, Iterator[String]] = {
     val lines = readFile(filePath)
     if (lines.isEmpty) {
       val errMsg = s"FileReader: File is empty, File Path: $filePath"
@@ -66,30 +63,27 @@ object FileReader {
   }
 
   // Failed rows are logged as warnings and skipped, not treated as fatal
-  private def readRows(filePath: String): Either[String, List[Transaction]] = {
-    val fileLines = readFile(filePath)
-
-    val results = fileLines.tail.zipWithIndex.map(pair => parseRow(pair._1, pair._2 + 2))
-
-    val transactions = results.collect { case Right(t) => t }
-    val errors = results.collect { case Left(e) => e }
-
-    errors.foreach(err => Logger.warn(s"FileReader: Skipping row. $err"))
-
-    if (transactions.nonEmpty) {
-      Right(transactions)
-    } else {
-      Left(s"FileReader: No valid transactions could be parsed from $filePath")
-    }
+  private def readRows(filePath: String): Either[String, Iterator[List[Transaction]]] = {
+    val fileLines = readFile(filePath).drop(1)
+    val batches: Iterator[List[Transaction]] = fileLines.zipWithIndex
+      .map { case (line, index) => parseRow(line, index + 2) }
+      .tapEach {
+        case Left(err) => Logger.warn(s"FileReader: Skipping row. $err")
+        case _         => ()
+      }
+      .collect { case Right(t) => t }
+      .grouped(50000)
+      .map(_.toList)
+    Right(batches)
   }
 
-  def read(filePath: String): Either[String, List[Transaction]] = {
+  def read(filePath: String): Either[String, Iterator[List[Transaction]]] = {
     validateExtension(filePath) match {
       case Left(err) => Left(err)
       case Right(_)  =>
         validateNotEmpty(filePath) match {
-          case Left(err)   => Left(err)
-          case Right(lines) => readRows(filePath)
+          case Left(err) => Left(err)
+          case Right(_)  => readRows(filePath)
         }
     }
   }
