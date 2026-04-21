@@ -49,7 +49,7 @@ object FileReader {
       } else {
         // Only run this if we actually have enough columns
         val transaction = Transaction(
-          timestamp     = LocalDateTime.parse(columns(0)),
+          timestamp = LocalDateTime.parse(columns(0).stripSuffix("Z")),
           productName   = columns(1),
           expiryDate    = LocalDate.parse(columns(2)),
           quantity      = columns(3).toInt,
