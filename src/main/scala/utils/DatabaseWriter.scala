@@ -8,7 +8,7 @@ object DatabaseWriter {
 
   private val url      = sys.env.getOrElse("DB_URL", "jdbc:mysql://localhost:3306/orders_db")
   private val username = sys.env.getOrElse("DB_USER", "root")
-  private val password = sys.env.getOrElse("DB_PASS", "123")
+  private val password = sys.env.getOrElse("DB_PASS", "YOURPASSWORD")
   private val table    = "orders"
 
   private def getConnection: Either[String, Connection] = {
