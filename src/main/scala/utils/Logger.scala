@@ -1,3 +1,5 @@
+package utils
+
 import java.nio.file.{Files, Paths, StandardOpenOption}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
