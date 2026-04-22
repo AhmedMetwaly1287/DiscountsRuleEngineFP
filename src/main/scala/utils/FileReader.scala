@@ -10,31 +10,20 @@ import scala.util.Using
 object FileReader {
 
   private def validateExtension(filePath: String): Either[String, String] = {
-    val extensions = List("csv","json")
-    val fileExt = filePath.split("\\.").last
-    if (extensions.contains(fileExt)){
-      Right(filePath)
-    }
-    else{
-      val errMsg = s"FileReader: Invalid file Format, File Path: $filePath"
-      Logger.error(errMsg)
-      Left(errMsg)
-    }
-  }
-
-  private def readFile(fileName: String, codec: String = Codec.UTF8.toString): Iterator[String] = {
-    Source.fromFile(fileName, codec).getLines()
+    val extensions = List("csv", "json")
+    val fileExt    = filePath.split("\\.").last
+    if (extensions.contains(fileExt)) Right(filePath)
+    else Left(s"FileReader: Invalid file format, File Path: $filePath")
   }
 
   private def validateNotEmpty(filePath: String): Either[String, Iterator[String]] = {
     val lines = readFile(filePath)
-    if (lines.isEmpty) {
-      val errMsg = s"FileReader: File is empty, File Path: $filePath"
-      Logger.error(errMsg)
-      Left(errMsg)
-    } else {
-      Right(lines)
-    }
+    if (lines.isEmpty) Left(s"FileReader: File is empty, File Path: $filePath")
+    else Right(lines)
+  }
+
+  private def readFile(fileName: String, codec: String = Codec.UTF8.toString): Iterator[String] = {
+    Source.fromFile(fileName, codec).getLines()
   }
 
   private def parseRow(row: String, lineNumber: Int): Either[String, Transaction] = {
