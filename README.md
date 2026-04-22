@@ -241,3 +241,4 @@ import scala.collection.parallel.CollectionConverters._
 - The file is read twice during validation (once in `validateNotEmpty`, once in `readRows`). This is a minor inefficiency that could be removed with a small refactor.
 - Batch size is currently hardcoded at 10,000. In a production system this would be a configurable parameter.
 - All rules had to be modified from private in order to not cause conflict with our test cases, this should be further investigated to ensure the user can only access the exposed allRules List
+- The pipeline assumes Database and Table existence, need to make the process of creation dynamic in case of absence of both.
